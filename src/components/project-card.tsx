@@ -7,15 +7,7 @@ import {
   rem,
   Avatar,
 } from "@mantine/core";
-import {
-  IconUserPlus,
-  IconDiscount2,
-  IconReceipt2,
-  IconCoin,
-  IconArrowUpRight,
-  IconArrowDownRight,
-  IconInfoSmall,
-} from "@tabler/icons-react";
+import Link from "next/link";
 
 const useStyles = createStyles((theme) => ({
   root: {
@@ -75,7 +67,14 @@ export function StatsGrid({ data }: { data: IProjectDetails[] }) {
   const { classes } = useStyles();
   const stats = data.map((stat) => {
     return (
-      <Paper withBorder p="md" radius="md" key={stat.id}>
+      <Paper
+        withBorder
+        p="md"
+        radius="md"
+        key={stat.id}
+        component={Link}
+        href={`/${stat.id}`}
+      >
         <Group position="apart">
           <Text size="md" className={classes.title}>
             {stat.name}
