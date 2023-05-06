@@ -89,6 +89,8 @@ model Project {
     team          Team      @relation(fields: [teamId], references: [id])
     createdAt     DateTime  @default(now())
     updatedAt     DateTime  @updatedAt
+    signatureFile String
+    sourceCodeUrl String
     teamId        String
     Results       Results[]
 

@@ -18,6 +18,7 @@ import { useEffect } from "react";
 import { api } from "~/utils/api";
 import { useTeamStore } from "~/store/team-store";
 import { ProjectCardLoader } from "~/components/project-card/loader";
+import Link from "next/link";
 
 const data = [
   {
@@ -76,7 +77,13 @@ const Home = () => {
               <TextInput placeholder="Search..." radius={"sm"} size="sm" />
             </Grid.Col>
             <Grid.Col span={2}>
-              <Button variant="white" fullWidth color="dark">
+              <Button
+                variant="white"
+                fullWidth
+                color="dark"
+                component={Link}
+                href={"/new"}
+              >
                 Add New
               </Button>
             </Grid.Col>

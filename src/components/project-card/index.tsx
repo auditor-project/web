@@ -63,6 +63,18 @@ const timesAgo = (date: Date): string => {
 
 export function StatsGrid({ data }: { data: Project[] }) {
   const { classes } = useStyles();
+
+  const getProjectName = (name: string): string => {
+    const split = name.split(" ");
+    if (split.length >= 2) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      return `${split[0][0]}${split[1][0]}`;
+    }
+
+    return `${name[0]}${name[1]}`;
+  };
+
   const projects = data.map((project) => {
     return (
       <Paper
@@ -82,7 +94,7 @@ export function StatsGrid({ data }: { data: Project[] }) {
           </Text>
 
           <Avatar radius="xl" color="teal" size={"md"}>
-            {project.name}
+            {getProjectName(project.name as string)}
           </Avatar>
         </Group>
 

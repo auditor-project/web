@@ -3,7 +3,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 
 export const projectRouter = createTRPCRouter({
   projects: protectedProcedure
@@ -12,6 +16,29 @@ export const projectRouter = createTRPCRouter({
       return ctx.prisma.project.findMany({
         where: {
           teamId: input.teamId,
+        },
+      });
+    }),
+
+  findById: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input, ctx }) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const project = await ctx.prisma.project.findFirst({
+        where: {
+          id: input.id,
+        },
+      });
+
+      return project;
+    }),
+
+  exists: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input, ctx }) => {
+      return await ctx.prisma.project.count({
+        where: {
+          id: input.id,
         },
       });
     }),

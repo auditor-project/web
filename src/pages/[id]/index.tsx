@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   Text,
   Button,
@@ -8,18 +11,54 @@ import {
   Stack,
   Avatar,
 } from "@mantine/core";
+import {
+  type GetServerSidePropsContext,
+  type InferGetServerSidePropsType,
+} from "next";
 import Link from "next/link";
+import SuperJSON from "superjson";
 import { TimeLineComponent } from "~/components/timeline";
+import { createServerSideHelpers } from "@trpc/react-query/server";
 import { DashboardLayout } from "~/layouts/dashboard";
+import { appRouter } from "~/server/api/root";
+import { prisma } from "~/server/db";
+import { api } from "~/utils/api";
 
-const data = {
-  id: "1234",
-  name: "Example Project",
-  description: "This is an example project",
-  createdAt: "2023-05-05T18:17:41.128Z",
-};
+export async function getServerSideProps(
+  context: GetServerSidePropsContext<{ id: string }>
+) {
+  const helpers = createServerSideHelpers({
+    router: appRouter,
+    ctx: { prisma, session: null },
+    transformer: SuperJSON,
+  });
 
-const AnalysisDetailsPage = () => {
+  const id = context.params?.id as string;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const projectExists = await helpers.projects.exists.fetch({ id });
+
+  if (projectExists) {
+    await helpers.projects.findById.prefetch({ id });
+  } else {
+    // if post doesn't exist, return 404
+    return {
+      props: { id },
+      notFound: true,
+    };
+  }
+  return {
+    props: {
+      trpcState: helpers.dehydrate(),
+      id,
+    },
+  };
+}
+
+const AnalysisDetailsPage = ({
+  id,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const { data } = api.projects.findById.useQuery({ id });
+
   return (
     <>
       <Container size="xl">
@@ -31,12 +70,12 @@ const AnalysisDetailsPage = () => {
           mt={20}
         >
           <Group position="apart">
-            <Title style={{ color: "white" }}>{data.name}</Title>
+            <Title style={{ color: "white" }}>{data?.name}</Title>
             <Button
               variant="white"
               color="dark"
               component={Link}
-              href={"/1234/analysis"}
+              href={`/${data?.id}/analysis`}
             >
               Analysis Response
             </Button>
@@ -46,7 +85,7 @@ const AnalysisDetailsPage = () => {
       <Container size={"xl"}>
         <Stack mt={30}>
           <Title order={3}>Analysis Information</Title>
-          <Text>{data.description}</Text>
+          <Text>{data?.description}</Text>
           <Avatar.Group spacing="sm">
             <Avatar src="image.png" radius="xl" />
             <Avatar src="image.png" radius="xl" />
