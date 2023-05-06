@@ -2,17 +2,7 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
-import {
-  Avatar,
-  Box,
-  Button,
-  Modal,
-  Stack,
-  TextInput,
-  Textarea,
-} from "@mantine/core";
-import { IconTrash } from "@tabler/icons-react";
-import { randomId } from "@mantine/hooks";
+import { Avatar, Box, Button, Modal, TextInput } from "@mantine/core";
 import { api } from "~/utils/api";
 import Router from "next/router";
 import { MemberSearchModal } from "./member-search";

@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { Text, Paper, Stack, Container, type PaperProps } from "@mantine/core";
-import { signIn, useSession } from "next-auth/react";
-import { useEffect } from "react";
+import { signIn } from "next-auth/react";
 import {
   GithubButton,
   GoogleButton,
   TwitterButton,
 } from "~/components/social-buttons";
-import Router from "next/router";
 
 function AuthenticationForm(props: PaperProps) {
   return (

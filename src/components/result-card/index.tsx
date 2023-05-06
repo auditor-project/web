@@ -34,7 +34,7 @@ const generateCode = (code: (string | number | boolean)[][]) => {
 
   code.forEach((line, index) => {
     codelines.push(line[1] as string);
-    if (line[2] == true) {
+    if (line[2]) {
       highlightLines[index + 1] = {
         color: "yellow",
       };
@@ -56,7 +56,7 @@ const getSeverityColor = (level: string) => {
 
 export const ResultCard = (props: IResultCardProps) => {
   const { code, lines } = generateCode(props.code);
-  const [opened, { open, close }] = useDisclosure(false);
+  const [opened, { open }] = useDisclosure(false);
   return (
     <Paper
       shadow="md"
