@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import { api } from "~/utils/api";
 import { MantineProvider } from "@mantine/core";
 import "~/styles/globals.css";
+import { Notifications } from "@mantine/notifications";
 
 interface NextAppProps extends AppProps {
   Component: AppProps["Component"] & {
@@ -25,6 +26,7 @@ const NextApp = ({ Component, pageProps }: NextAppProps) => {
         colorScheme: "dark",
       }}
     >
+      <Notifications position="top-right" />
       <SessionProvider session={session}>
         {Component.PageLayout ? (
           <Component.PageLayout>

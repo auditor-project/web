@@ -32,7 +32,7 @@ const AuthPage = () => {
     if (!session?.user) {
       void Router.push("/");
     }
-  }, []);
+  }, [session?.user]);
 
   return (
     <Container size={"xs"}>

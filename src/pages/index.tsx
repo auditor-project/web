@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Container, TextInput, Title } from "@mantine/core";
 import Head from "next/head";
 import { DashboardLayout } from "~/layouts/dashboard";
@@ -5,6 +6,7 @@ import { StatsGrid } from "~/components/project-card";
 import { useSession } from "next-auth/react";
 import Router from "next/router";
 import { useEffect } from "react";
+import { api } from "~/utils/api";
 
 const data = [
   {
@@ -23,12 +25,21 @@ const data = [
 
 const Home = () => {
   const { data: session } = useSession();
+  const teams = api.teams.myTeams.useQuery();
 
   useEffect(() => {
     if (!session?.user) {
       void Router.push("/auth");
     }
-  }, []);
+  }, [session?.user]);
+
+  useEffect(() => {
+    if (teams.data) {
+      if (teams.data.length == 0) {
+        void Router.push("/create-team");
+      }
+    }
+  }, [teams.data]);
 
   return (
     <>
