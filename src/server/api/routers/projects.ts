@@ -51,6 +51,8 @@ export const projectRouter = createTRPCRouter({
         description: z.string(),
         currentStatus: z.string(),
         teamId: z.string(),
+        sourceCodeUrl: z.string(),
+        signatureFile: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {

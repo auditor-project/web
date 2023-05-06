@@ -11,6 +11,7 @@ const NewProjectInit = () => {
     teamId: teamId as string,
     description: "",
     currentStatus: ProjectStatus.PENDING,
+    signatureFile: "signatures/signatures.yaml",
   };
   return (
     <Container size="xl">

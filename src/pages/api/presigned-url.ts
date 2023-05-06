@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { fileContentTypes } from "~/utils/file-types";
 import { type Conditions } from "@aws-sdk/s3-presigned-post/dist-types/types";
-import { type PresignedPost } from "aws-sdk/clients/s3";
+import S3, { type PresignedPost } from "aws-sdk/clients/s3";
 import { S3Client } from "@aws-sdk/client-s3";
 import { env } from "~/env.mjs";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
@@ -62,6 +62,7 @@ export default async function handler(
   ];
 
   const s3Client = new S3Client({
+    region: env.AWS_REGION,
     credentials: {
       accessKeyId: env.AWS_ACCESS_KEY_ID,
       secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
@@ -82,11 +83,18 @@ export default async function handler(
     Expires: signedUrlExpireSeconds,
   });
 
+  const { Key, ...rest } = presignedPost.fields;
+
   res.status(200).json({
     uniqueFileName: uniqueFileName,
     fileExtension: extension,
     contentType: contentType,
-    presignedPost,
+    presignedPost: {
+      ...presignedPost,
+      fields: {
+        ...rest,
+      },
+    },
     type: response.data.action,
     acl: "public-read",
     uploadKey: `${uploadFolder}/${bucketFileName}`,
