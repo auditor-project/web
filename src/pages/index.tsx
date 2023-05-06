@@ -24,14 +24,7 @@ const data = [
 ];
 
 const Home = () => {
-  const { data: session } = useSession();
   const teams = api.teams.myTeams.useQuery();
-
-  useEffect(() => {
-    if (!session?.user) {
-      void Router.push("/auth");
-    }
-  }, [session?.user]);
 
   useEffect(() => {
     if (teams.data) {

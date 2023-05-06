@@ -7,6 +7,8 @@ import {
   Burger,
   useMantineTheme,
 } from "@mantine/core";
+import { useSession } from "next-auth/react";
+import Router from "next/router";
 
 export const DashboardLayout = ({
   children,
@@ -15,6 +17,16 @@ export const DashboardLayout = ({
 }) => {
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(false);
+  const { data: session, status } = useSession();
+
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
+
+  if (!session) {
+    void Router.push("/auth");
+  }
+
   return (
     <AppShell
       styles={{

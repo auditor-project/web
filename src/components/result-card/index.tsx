@@ -1,15 +1,6 @@
-import {
-  Badge,
-  Box,
-  Button,
-  DefaultMantineColor,
-  Group,
-  Paper,
-  Stack,
-  Text,
-} from "@mantine/core";
+import { Badge, Box, Button, Group, Paper, Stack, Text } from "@mantine/core";
 import { Prism } from "@mantine/prism";
-import { Language } from "prism-react-renderer";
+import { type Language } from "prism-react-renderer";
 import { CommentDetails } from "./comment";
 import { CreateCommentComponent } from "./create-comment";
 import { useDisclosure } from "@mantine/hooks";

@@ -26,14 +26,6 @@ function AuthenticationForm(props: PaperProps) {
 }
 
 const AuthPage = () => {
-  const { data: session } = useSession();
-
-  useEffect(() => {
-    if (!session?.user) {
-      void Router.push("/");
-    }
-  }, [session?.user]);
-
   return (
     <Container size={"xs"}>
       <AuthenticationForm mt={100} />

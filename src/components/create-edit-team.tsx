@@ -33,10 +33,17 @@ export const CreateOrEditTeam = (props: ICreateOrEditTeam) => {
       image: string;
     }[]
   >([]);
-  const [opened, { open, close }] = useDisclosure(false);
-  const handleFormSubmission = (values: ICreateOrEditTeam) => {
-    console.log(values);
+  const upsert = api.teams.upsert.useMutation();
+  const handleSubmit = async (values: ICreateOrEditTeam) => {
+    await upsert.mutateAsync({
+      ...values,
+      users: members.map((member) => member.id),
+    });
+
+    void Router.push("/");
   };
+
+  const [opened, { open, close }] = useDisclosure(false);
 
   const form = useForm({
     initialValues: {
@@ -64,7 +71,7 @@ export const CreateOrEditTeam = (props: ICreateOrEditTeam) => {
       <Box>
         <form
           onSubmit={form.onSubmit((values) =>
-            handleFormSubmission({
+            handleSubmit({
               ...values,
             })
           )}
@@ -100,7 +107,13 @@ export const CreateOrEditTeam = (props: ICreateOrEditTeam) => {
             </Button>
           </Box>
 
-          <Button type="submit" mt="md" variant="white" color="dark">
+          <Button
+            type="submit"
+            mt="md"
+            variant="white"
+            color="dark"
+            loading={upsert.isLoading}
+          >
             {props.id ? `Update ${props.name}` : "Submit"}
           </Button>
         </form>
