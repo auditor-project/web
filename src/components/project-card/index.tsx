@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import {
   createStyles,
   Group,
@@ -7,6 +11,7 @@ import {
   rem,
   Avatar,
 } from "@mantine/core";
+import { Project } from "@prisma/client";
 import Link from "next/link";
 
 const useStyles = createStyles((theme) => ({
@@ -38,13 +43,6 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-interface IProjectDetails {
-  id: string;
-  name: string;
-  description: string;
-  createdAt: string;
-}
-
 const timesAgo = (date: Date): string => {
   const now = new Date();
   const delta = now.getTime() - date.getTime();
@@ -63,25 +61,28 @@ const timesAgo = (date: Date): string => {
   }
 };
 
-export function StatsGrid({ data }: { data: IProjectDetails[] }) {
+export function StatsGrid({ data }: { data: Project[] }) {
   const { classes } = useStyles();
-  const stats = data.map((stat) => {
+  const projects = data.map((project) => {
     return (
       <Paper
         withBorder
+        style={{
+          backgroundColor: "black",
+        }}
         p="md"
         radius="md"
-        key={stat.id}
+        key={project.id}
         component={Link}
-        href={`/${stat.id}`}
+        href={`/${project.id}`}
       >
         <Group position="apart">
           <Text size="md" className={classes.title}>
-            {stat.name}
+            {project.name}
           </Text>
 
           <Avatar radius="xl" color="teal" size={"md"}>
-            EP
+            {project.name}
           </Avatar>
         </Group>
 
@@ -93,7 +94,7 @@ export function StatsGrid({ data }: { data: IProjectDetails[] }) {
         </Group>
 
         <Text fz="xs" c="dimmed" mt={10}>
-          {timesAgo(new Date(stat.createdAt))}
+          {timesAgo(project.createdAt)}
         </Text>
       </Paper>
     );
@@ -106,7 +107,7 @@ export function StatsGrid({ data }: { data: IProjectDetails[] }) {
         { maxWidth: "xs", cols: 1 },
       ]}
     >
-      {stats}
+      {projects}
     </SimpleGrid>
   );
 }

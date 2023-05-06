@@ -5,7 +5,7 @@ export type Nullable<T> = T | undefined;
 
 interface ITeamStore {
   teamId: Nullable<string>;
-  setTeamId: (team: string) => void;
+  setTeamId: (team: string | undefined) => void;
   clear: () => void;
 }
 
