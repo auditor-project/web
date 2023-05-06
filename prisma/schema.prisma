@@ -63,8 +63,56 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    teams         Team[]
 
     @@map("user")
+}
+
+model Team {
+    id        String    @id @default(cuid())
+    name      String    @unique
+    imageUrl  String
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    Project   Project[]
+    userId    String?
+    users     User[]
+
+    @@map("team")
+}
+
+model Project {
+    id            String    @id @default(cuid())
+    name          String
+    description   String
+    currentStatus String
+    team          Team      @relation(fields: [teamId], references: [id])
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
+    teamId        String
+    results       Results[]
+
+    @@index([teamId])
+    @@map("project")
+}
+
+model Results {
+    id        String   @id @default(cuid())
+    file      String
+    filetype  String
+    search    String
+    matchStr  String   @map("match_str")
+    hits      String
+    line      Int
+    code      Json
+    severity  String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    Project   Project? @relation(fields: [projectId], references: [id])
+    projectId String?
+
+    @@index([projectId])
+    @@map("results")
 }
 
 model VerificationToken {

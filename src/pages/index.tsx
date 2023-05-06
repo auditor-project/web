@@ -2,6 +2,9 @@ import { Container, TextInput, Title } from "@mantine/core";
 import Head from "next/head";
 import { DashboardLayout } from "~/layouts/dashboard";
 import { StatsGrid } from "~/components/project-card";
+import { useSession } from "next-auth/react";
+import Router from "next/router";
+import { useEffect } from "react";
 
 const data = [
   {
@@ -19,6 +22,14 @@ const data = [
 ];
 
 const Home = () => {
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (!session?.user) {
+      void Router.push("/auth");
+    }
+  }, []);
+
   return (
     <>
       <Head>

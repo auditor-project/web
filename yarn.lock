@@ -248,6 +248,13 @@
     "@mantine/utils" "6.0.7"
     react-dropzone "14.2.3"
 
+"@mantine/ds@^6.0.10":
+  version "6.0.10"
+  resolved "https://registry.yarnpkg.com/@mantine/ds/-/ds-6.0.10.tgz#9de3c439cafbb4579e2019d1d6628c885ca0a6bb"
+  integrity sha512-CA+mdY8hE2CGWO2tRVrh4hd918oEvBn2EtRb4NbHZoZ9NhNr7GsJPhl9I2ItmoYzUT2Fuc0RU9yOxXjnnR8CDg==
+  dependencies:
+    "@mantine/utils" "6.0.10"
+
 "@mantine/form@^6.0.7":
   version "6.0.7"
   resolved "https://registry.yarnpkg.com/@mantine/form/-/form-6.0.7.tgz#4ccbaf2ef587d4f27d885d44148f74db7266419a"
@@ -3265,7 +3272,7 @@ use-sidecar@^1.1.2:
     detect-node-es "^1.1.0"
     tslib "^2.0.0"
 
-use-sync-external-store@^1.2.0:
+use-sync-external-store@1.2.0, use-sync-external-store@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.2.0.tgz#7dbefd6ef3fe4e767a0cf5d7287aacfb5846928a"
   integrity sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==
@@ -3356,3 +3363,10 @@ zod@^3.21.4:
   version "3.21.4"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.21.4.tgz#10882231d992519f0a10b5dd58a38c9dabbb64db"
   integrity sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==
+
+zustand@^4.3.8:
+  version "4.3.8"
+  resolved "https://registry.yarnpkg.com/zustand/-/zustand-4.3.8.tgz#37113df8e9e1421b0be1b2dca02b49b76210e7c4"
+  integrity sha512-4h28KCkHg5ii/wcFFJ5Fp+k1J3gJoasaIbppdgZFO4BPJnsNxL0mQXBSFgOgAdCdBj35aDTPvdAJReTMntFPGg==
+  dependencies:
+    use-sync-external-store "1.2.0"
