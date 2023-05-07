@@ -6,6 +6,7 @@ import {
   MediaQuery,
   Burger,
   useMantineTheme,
+  LoadingOverlay,
 } from "@mantine/core";
 import { useSession } from "next-auth/react";
 import Router from "next/router";
@@ -20,7 +21,14 @@ export const DashboardLayout = ({
   const { data: session, status } = useSession();
 
   if (status === "loading") {
-    return <div>Loading...</div>;
+    return (
+      <LoadingOverlay
+        visible={true}
+        overlayBlur={2}
+        overlayOpacity={0.3}
+        overlayColor="black"
+      />
+    );
   }
 
   if (!session) {

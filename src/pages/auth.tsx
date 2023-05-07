@@ -1,6 +1,14 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
-import { Text, Paper, Stack, Container, type PaperProps } from "@mantine/core";
-import { signIn } from "next-auth/react";
+import {
+  Text,
+  Paper,
+  Stack,
+  Container,
+  type PaperProps,
+  LoadingOverlay,
+} from "@mantine/core";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import {
   GithubButton,
   GoogleButton,
@@ -24,6 +32,26 @@ function AuthenticationForm(props: PaperProps) {
 }
 
 const AuthPage = () => {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  if (status === "loading") {
+    return (
+      <LoadingOverlay
+        visible={true}
+        overlayBlur={2}
+        overlayOpacity={0.3}
+        overlayColor="black"
+      />
+    );
+  }
+
+  if (session) {
+    // Redirect the user to the homepage if they are already authenticated
+    void router.push("/");
+    return null;
+  }
+
   return (
     <Container size={"xs"}>
       <AuthenticationForm mt={100} />

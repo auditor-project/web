@@ -6,6 +6,7 @@ import { api } from "~/utils/api";
 import { MantineProvider } from "@mantine/core";
 import "~/styles/globals.css";
 import { Notifications } from "@mantine/notifications";
+import NextNProgress from "nextjs-progressbar";
 
 interface NextAppProps extends AppProps {
   Component: AppProps["Component"] & {
@@ -19,24 +20,27 @@ const NextApp = ({ Component, pageProps }: NextAppProps) => {
   const { session } = pageProps;
 
   return (
-    <MantineProvider
-      withGlobalStyles
-      withNormalizeCSS
-      theme={{
-        colorScheme: "dark",
-      }}
-    >
-      <Notifications position="top-right" />
-      <SessionProvider session={session}>
-        {Component.PageLayout ? (
-          <Component.PageLayout>
+    <>
+      <NextNProgress color="#1971c2" startPosition={0.3} height={2} />
+      <MantineProvider
+        withGlobalStyles
+        withNormalizeCSS
+        theme={{
+          colorScheme: "dark",
+        }}
+      >
+        <Notifications position="top-right" />
+        <SessionProvider session={session}>
+          {Component.PageLayout ? (
+            <Component.PageLayout>
+              <Component {...pageProps} />
+            </Component.PageLayout>
+          ) : (
             <Component {...pageProps} />
-          </Component.PageLayout>
-        ) : (
-          <Component {...pageProps} />
-        )}
-      </SessionProvider>
-    </MantineProvider>
+          )}
+        </SessionProvider>
+      </MantineProvider>
+    </>
   );
 };
 
