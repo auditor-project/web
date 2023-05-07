@@ -14,7 +14,7 @@ import {
 import { api } from "~/utils/api";
 import Router from "next/router";
 import useFileUploader from "~/hooks/image-uploader";
-import { Dropzone, FileWithPath } from "@mantine/dropzone";
+import { Dropzone, type FileWithPath } from "@mantine/dropzone";
 import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react";
 import { useState } from "react";
 import axios from "axios";
