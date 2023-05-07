@@ -1,14 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import {
-  Button,
-  Container,
-  Grid,
-  Paper,
-  Skeleton,
-  TextInput,
-  Title,
-} from "@mantine/core";
+import { Button, Container, Grid, TextInput, Title } from "@mantine/core";
 import Head from "next/head";
 import { DashboardLayout } from "~/layouts/dashboard";
 import { StatsGrid } from "~/components/project-card";
@@ -19,21 +11,6 @@ import { api } from "~/utils/api";
 import { useTeamStore } from "~/store/team-store";
 import { ProjectCardLoader } from "~/components/project-card/loader";
 import Link from "next/link";
-
-const data = [
-  {
-    id: "1234",
-    name: "Example Project",
-    description: "This is an example project",
-    createdAt: "2023-05-05T18:17:41.128Z",
-  },
-  {
-    id: "12345",
-    name: "Example Project",
-    description: "This is an example project",
-    createdAt: "2023-05-05T18:17:41.128Z",
-  },
-];
 
 const Home = () => {
   const { data: session } = useSession();

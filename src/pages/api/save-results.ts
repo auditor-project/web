@@ -65,6 +65,7 @@ export default async function handler(
     code: result.code,
     projectId: response.data.projectId,
     severity: "not-marked",
+    comments: [],
   }));
 
   try {
