@@ -62,9 +62,13 @@ export async function getServerSideProps(
 const AnalysisReport = ({
   id,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const [page, onChange] = useState(1);
+  const [page, onChange] = useState(0);
   const [limit, setLimit] = useState(5);
   const [total, setTotal] = useState(0);
+
+  const onChangePaginiation = (val: number) => {
+    onChange(val - 1);
+  };
 
   const pagination = usePagination({ total: total, page, onChange });
   const { data: project } = api.projects.findById.useQuery({ id });
@@ -147,9 +151,9 @@ const AnalysisReport = ({
 
               <Pagination
                 mt={20}
-                value={page}
-                onChange={onChange}
-                total={Math.round(total / limit)}
+                value={page + 1}
+                onChange={onChangePaginiation}
+                total={Math.round(total / limit) + 1}
               />
             </Box>
           </Grid.Col>
