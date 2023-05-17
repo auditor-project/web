@@ -1,4 +1,4 @@
-import { Avatar, Text, Group, ActionIcon, Menu } from "@mantine/core";
+import { Avatar, Text, Group, ActionIcon, Menu, Loader } from "@mantine/core";
 import { Team } from "@prisma/client";
 import {
   IconCheck,
@@ -35,13 +35,17 @@ export const TeamSwitch = () => {
   return (
     <Menu shadow="md" width={300}>
       <Menu.Target>
-        <Group>
-          <Avatar radius="xl">{currentTeam.data?.name[0]}</Avatar>
-          <Text>{currentTeam.data?.name}</Text>
-          <ActionIcon>
-            <IconSelector size="1.125rem" />
-          </ActionIcon>
-        </Group>
+        {currentTeam.isLoading ? (
+          <Loader size={"sm"} />
+        ) : (
+          <Group>
+            <Avatar radius="xl">{currentTeam.data?.name[0]}</Avatar>
+            <Text>{currentTeam.data?.name}</Text>
+            <ActionIcon>
+              <IconSelector size="1.125rem" />
+            </ActionIcon>
+          </Group>
+        )}
       </Menu.Target>
 
       <Menu.Dropdown>

@@ -101,6 +101,7 @@ export function StatsGrid({ data }: { data: Project[] }) {
         { maxWidth: "md", cols: 2 },
         { maxWidth: "xs", cols: 1 },
       ]}
+      className="project-card"
     >
       {projects}
     </SimpleGrid>
