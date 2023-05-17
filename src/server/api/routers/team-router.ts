@@ -6,6 +6,25 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 export const teamRouter = createTRPCRouter({
+  byId: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .query(({ input, ctx }) => {
+      return ctx.prisma.team.findFirst({
+        where: {
+          id: input.id,
+          users: {
+            some: {
+              id: ctx.session.user.id,
+            },
+          },
+        },
+      });
+    }),
+
   myTeams: protectedProcedure.query(({ ctx }) => {
     return ctx.prisma.team.findMany({
       where: {

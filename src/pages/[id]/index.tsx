@@ -102,7 +102,7 @@ const AnalysisDetailsPage = ({
           p={40}
         >
           <Group position="apart">
-            <TimeLineComponent />
+            {data && <TimeLineComponent project={data} />}
           </Group>
         </Paper>
       </Container>

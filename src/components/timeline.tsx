@@ -1,65 +1,85 @@
 import { Timeline, Text } from "@mantine/core";
+import { type Project } from "@prisma/client";
 import {
-  IconGitBranch,
-  IconGitPullRequest,
-  IconGitCommit,
   IconMessageDots,
+  IconPlus,
+  IconLoader,
+  IconClockPause,
+  IconUsers,
 } from "@tabler/icons-react";
+import { ProjectStatus } from "~/enum/project-status.enum";
+import { timesAgo } from "~/utils/times-ago";
 
-export function TimeLineComponent() {
+const getProjectStatusAsNumber = (status: ProjectStatus): number => {
+  switch (status) {
+    case ProjectStatus.PENDING:
+      return 1;
+    case ProjectStatus.QUEUED:
+      return 2;
+    case ProjectStatus.PROCESSING:
+      return 3;
+    case ProjectStatus.COMPLETED:
+      return 4;
+    default:
+      return -1;
+  }
+};
+
+export function TimeLineComponent({ project }: { project: Project }) {
   return (
-    <Timeline active={1} bulletSize={24} lineWidth={2}>
-      <Timeline.Item bullet={<IconGitBranch size={12} />} title="New branch">
+    <Timeline
+      active={getProjectStatusAsNumber(project.currentStatus as ProjectStatus)}
+      bulletSize={24}
+      lineWidth={2}
+    >
+      <Timeline.Item
+        bullet={<IconPlus size={12} />}
+        title="Initiate A New Project"
+      >
         <Text color="dimmed" size="sm">
-          You&apos;ve created new branch{" "}
-          <Text variant="link" component="span" inherit>
-            fix-notifications
-          </Text>{" "}
-          from master
+          You&apos;ve created new project{" "}
         </Text>
         <Text size="xs" mt={4}>
-          2 hours ago
+          {timesAgo(project.createdAt)}
         </Text>
       </Timeline.Item>
 
-      <Timeline.Item bullet={<IconGitCommit size={12} />} title="Commits">
+      <Timeline.Item bullet={<IconClockPause size={12} />} title="Pending">
         <Text color="dimmed" size="sm">
-          You&apos;ve pushed 23 commits to
-          <Text variant="link" component="span" inherit>
-            fix-notifications branch
-          </Text>
+          Your task is pending
         </Text>
         <Text size="xs" mt={4}>
-          52 minutes ago
+          waiting to be picked up
+        </Text>
+      </Timeline.Item>
+
+      <Timeline.Item bullet={<IconUsers size={12} />} title="Queued">
+        <Text color="dimmed" size="sm">
+          Your task have been pushed to queue
+        </Text>
+        <Text size="xs" mt={4}>
+          waiting for processing
+        </Text>
+      </Timeline.Item>
+
+      <Timeline.Item bullet={<IconLoader size={12} />} title="Start Processing">
+        <Text color="dimmed" size="sm">
+          We have started to process your task
+        </Text>
+        <Text size="xs" mt={4}>
+          we will inform you onces its completed
         </Text>
       </Timeline.Item>
 
       <Timeline.Item
-        title="Pull request"
-        bullet={<IconGitPullRequest size={12} />}
-        lineVariant="dashed"
+        bullet={<IconMessageDots size={12} />}
+        title="Ready to review
+        "
       >
         <Text color="dimmed" size="sm">
-          You&apos;ve submitted a pull request
-          <Text variant="link" component="span" inherit>
-            Fix incorrect notification message (#187)
-          </Text>
+          Your code has been processed ready to be reviewd
         </Text>
-        <Text size="xs" mt={4}>
-          34 minutes ago
-        </Text>
-      </Timeline.Item>
-
-      <Timeline.Item title="Code review" bullet={<IconMessageDots size={12} />}>
-        <Text color="dimmed" size="sm">
-          <Text variant="link" component="span" inherit>
-            Robert Gluesticker
-          </Text>{" "}
-          left a code review on your pull request
-        </Text>
-        <Text size="xs" mt={4}>
-          12 minutes ago
-        </Text>
+        <Text size="xs" mt={4}></Text>
       </Timeline.Item>
     </Timeline>
   );

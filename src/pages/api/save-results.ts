@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { z } from "zod";
+import { ProjectStatus } from "~/enum/project-status.enum";
 import { env } from "~/env.mjs";
 import { prisma } from "~/server/db";
 
@@ -70,6 +71,15 @@ export default async function handler(
   try {
     const data = await prisma.results.createMany({
       data: results,
+    });
+
+    await prisma.project.update({
+      where: {
+        id: response.data.projectId,
+      },
+      data: {
+        currentStatus: ProjectStatus.COMPLETED,
+      },
     });
 
     res.status(200).json({

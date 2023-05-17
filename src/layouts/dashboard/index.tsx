@@ -7,9 +7,13 @@ import {
   Burger,
   useMantineTheme,
   LoadingOverlay,
+  Title,
+  Group,
 } from "@mantine/core";
 import { useSession } from "next-auth/react";
 import Router from "next/router";
+import { TeamSwitch } from "~/components/team-switch";
+import Link from "next/link";
 
 export const DashboardLayout = ({
   children,
@@ -62,7 +66,20 @@ export const DashboardLayout = ({
               />
             </MediaQuery>
 
-            <Text>Application header</Text>
+            <Group>
+              <Link href={"/"}>
+                <Title
+                  order={4}
+                  style={{
+                    cursor: "pointer",
+                  }}
+                >
+                  Auditor
+                </Title>
+              </Link>
+
+              <TeamSwitch />
+            </Group>
           </div>
         </Header>
       }
