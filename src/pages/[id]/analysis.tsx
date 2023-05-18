@@ -12,9 +12,20 @@ import {
   Pagination,
   Box,
   SimpleGrid,
+  Modal,
+  ActionIcon,
+  Input,
+  TextInput,
+  NumberInput,
 } from "@mantine/core";
-import { usePagination } from "@mantine/hooks";
-import { IconCameraSelfie, IconPhoto, IconPrinter } from "@tabler/icons-react";
+import { useDisclosure, usePagination } from "@mantine/hooks";
+import {
+  IconCameraSelfie,
+  IconPhoto,
+  IconPrinter,
+  IconRoad,
+  IconSettings,
+} from "@tabler/icons-react";
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import {
   InferGetServerSidePropsType,
@@ -27,6 +38,7 @@ import { ResultCardLoader } from "~/components/result-card/loader";
 import { DashboardLayout } from "~/layouts/dashboard";
 import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
+import { useFilePathStore } from "~/store/file-path";
 import { api } from "~/utils/api";
 
 export async function getServerSideProps(
@@ -65,6 +77,8 @@ const AnalysisReport = ({
   const [page, onChange] = useState(0);
   const [limit, setLimit] = useState(5);
   const [total, setTotal] = useState(0);
+  const { path, setFilePath } = useFilePathStore();
+  const [opened, { open, close }] = useDisclosure(false);
 
   const onChangePaginiation = (val: number) => {
     onChange(val - 1);
@@ -87,6 +101,38 @@ const AnalysisReport = ({
 
   return (
     <>
+      <Modal
+        opened={opened}
+        onClose={close}
+        withCloseButton={false}
+        centered
+        size={"lg"}
+      >
+        <Title order={5}>Configure project</Title>
+
+        <Stack mt={20} mb={20} spacing={"xs"}>
+          <Text size={"sm"}>Project path</Text>
+          <TextInput
+            placeholder="this will be used to open in code"
+            icon={<IconRoad size="0.8rem" />}
+            value={path}
+            onChange={(event) => setFilePath(event.currentTarget.value)}
+          />
+
+          <Text size={"sm"}>Pagegination Limit</Text>
+          <NumberInput
+            value={limit}
+            onChange={(val: number) => setLimit(val)}
+            placeholder="pagination limit"
+            withAsterisk
+          />
+        </Stack>
+
+        <Button variant="outline" color="red" compact onClick={close}>
+          Close
+        </Button>
+      </Modal>
+
       <Container size="xl">
         <Paper
           shadow="md"
@@ -99,8 +145,14 @@ const AnalysisReport = ({
             <Stack>
               <Title style={{ color: "white" }}>{project?.name}</Title>
               <Text>{project?.description}</Text>
+
+              <ActionIcon onClick={open}>
+                <IconSettings size="1.125rem" />
+              </ActionIcon>
             </Stack>
-            <Text> {project?.createdAt.toDateString()}</Text>
+            <Stack>
+              <Text> {project?.createdAt.toDateString()}</Text>
+            </Stack>
           </Group>
         </Paper>
 

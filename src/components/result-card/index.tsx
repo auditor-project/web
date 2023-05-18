@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
@@ -9,6 +10,7 @@ import { CreateCommentComponent } from "./create-comment";
 import { useDisclosure } from "@mantine/hooks";
 import { Comments, Prisma, Results, User } from "@prisma/client";
 import { api } from "~/utils/api";
+import { useFilePathStore } from "~/store/file-path";
 
 const comment = {
   postedAt: "10 minutes ago",
@@ -51,10 +53,15 @@ const getSeverityColor = (level: string) => {
 export const ResultCard = (result: Results) => {
   const { code, lines } = generateCode(result.code);
   const [opened, { open, close }] = useDisclosure(false);
+  const { path } = useFilePathStore();
 
   const comments = api.results.comments.useQuery({
     resultId: result.id,
   });
+
+  const openInCode = (file: string) => {
+    window.open(`vscode://file${file}`);
+  };
 
   return (
     <Paper
@@ -71,8 +78,17 @@ export const ResultCard = (result: Results) => {
             {result.severity}
           </Badge>
         </Group>
-        <Text>
-          {result.file}:<span style={{ color: "green" }}>{result.line}</span>
+        <Text
+          style={{
+            cursor: "pointer",
+          }}
+          onClick={() => {
+            openInCode(`${path ? path : ""}/${result.file.split("/").at(-1)}`);
+          }}
+        >
+          {path}
+          {result.file.split("/").at(-1)}:
+          <span style={{ color: "green" }}>{result.line}</span>
         </Text>
       </Stack>
 
