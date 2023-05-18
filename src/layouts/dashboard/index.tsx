@@ -2,13 +2,13 @@ import { useState } from "react";
 import {
   AppShell,
   Header,
-  Text,
   MediaQuery,
   Burger,
   useMantineTheme,
   LoadingOverlay,
   Title,
   Group,
+  Avatar,
 } from "@mantine/core";
 import { useSession } from "next-auth/react";
 import Router from "next/router";
@@ -66,19 +66,31 @@ export const DashboardLayout = ({
               />
             </MediaQuery>
 
-            <Group>
-              <Link href={"/"}>
-                <Title
-                  order={4}
-                  style={{
-                    cursor: "pointer",
-                  }}
-                >
-                  Auditor
-                </Title>
-              </Link>
+            <Group
+              position={"apart"}
+              style={{
+                width: "100%",
+              }}
+              mx={20}
+            >
+              <Group>
+                <Link href={"/"}>
+                  <Title
+                    order={4}
+                    style={{
+                      cursor: "pointer",
+                    }}
+                  >
+                    Auditor
+                  </Title>
+                </Link>
 
-              <TeamSwitch />
+                <TeamSwitch />
+              </Group>
+
+              {session?.user && (
+                <Avatar src={session.user.image} radius={"lg"} />
+              )}
             </Group>
           </div>
         </Header>

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Button, Container, Grid, TextInput, Title } from "@mantine/core";
+import { Button, Container, Text, Grid, TextInput, Title } from "@mantine/core";
 import Head from "next/head";
 import { DashboardLayout } from "~/layouts/dashboard";
 import { StatsGrid } from "~/components/project-card";
@@ -67,6 +67,10 @@ const Home = () => {
           </Grid>
 
           {projects.isLoading && <ProjectCardLoader />}
+
+          {projects.data?.length == 0 && (
+            <Text color="dimmed">No projects found</Text>
+          )}
           {projects.data && <StatsGrid data={projects.data} />}
         </Container>
       </main>
