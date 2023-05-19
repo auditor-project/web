@@ -9,12 +9,14 @@ RUN yarn install --frozen-lockfile
 
 COPY . .
 
+RUN npx prisma generate
 RUN yarn build
 
 # Production stage
 FROM node:14-alpine
 
 WORKDIR /app
+
 
 COPY --from=build /app/package.json /app/yarn.lock .RUN yarn install --frozen-lockfile --production
 
