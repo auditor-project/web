@@ -6,74 +6,137 @@ import {
   Title,
   Stack,
   Grid,
-  Box,
-  useMantineTheme,
   Accordion,
   rem,
   Button,
+  Pagination,
+  Box,
+  Modal,
+  ActionIcon,
+  TextInput,
+  NumberInput,
+  List,
 } from "@mantine/core";
-import { IconCameraSelfie, IconPhoto, IconPrinter } from "@tabler/icons-react";
+import { randomId, useDisclosure, usePagination } from "@mantine/hooks";
+import {
+  IconCameraSelfie,
+  IconPhoto,
+  IconPrinter,
+  IconRoad,
+  IconSettings,
+} from "@tabler/icons-react";
+import { createServerSideHelpers } from "@trpc/react-query/server";
+import {
+  type InferGetServerSidePropsType,
+  type GetServerSidePropsContext,
+} from "next";
+import { useEffect, useState } from "react";
+import SuperJSON from "superjson";
 import { ResultCard } from "~/components/result-card";
+import { ResultCardLoader } from "~/components/result-card/loader";
 import { DashboardLayout } from "~/layouts/dashboard";
+import { appRouter } from "~/server/api/root";
+import { prisma } from "~/server/db";
+import { useFilePathStore } from "~/store/file-path";
+import { api } from "~/utils/api";
 
-const data = [
-  {
-    id: 1,
-    file: "/Users/dasith/Developer/projects/auditor/tmp-project/test.php",
-    filetype: "php",
-    search: "\\ssha1_file\\s*\\(",
-    match_str: " sha1_file(",
-    hits: '$file = sha1_file("/etc/passwd");',
-    line: 10,
-    severity: "high",
-    code: [
-      [1, "<?php", false],
-      [2, "  ", false],
-      [3, "$str = 'test';", false],
-      [4, "  ", false],
-      [5, "echo base64_encode($str);", false],
-      [6, "", false],
-      [7, '$out = sbzdecompress("test")', false],
-      [8, "", false],
-      [9, "", false],
-      [10, '$file = sha1_file("/etc/passwd");', true],
-      [11, "", false],
-      [12, "echo $file;", false],
-      [13, "", false],
-      [14, "?>", false],
-    ],
-  },
-  {
-    id: 2,
-    file: "/Users/dasith/Developer/projects/auditor/tmp-project/test.php",
-    filetype: "php",
-    search: "\\sbase64_encode\\s*\\(",
-    match_str: " base64_encode(",
-    hits: "echo base64_encode($str);",
-    line: 5,
-    severity: "not-marked",
-    code: [
-      [1, "<?php", false],
-      [2, "  ", false],
-      [3, "$str = 'test';", false],
-      [4, "  ", false],
-      [5, "echo base64_encode($str);", true],
-      [6, "", false],
-      [7, '$out = sbzdecompress("test")', false],
-      [8, "", false],
-      [9, "", false],
-      [10, '$file = sha1_file("/etc/passwd");', false],
-      [11, "", false],
-      [12, "echo $file;", false],
-      [13, "", false],
-      [14, "?>", false],
-    ],
-  },
-];
+export async function getServerSideProps(
+  context: GetServerSidePropsContext<{ id: string }>
+) {
+  const helpers = createServerSideHelpers({
+    router: appRouter,
+    ctx: { prisma, session: null },
+    transformer: SuperJSON,
+  });
 
-const AnalysisReport = () => {
+  const id = context.params?.id as string;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const projectExists = await helpers.projects.exists.fetch({ id });
+
+  if (projectExists) {
+    await helpers.projects.findById.prefetch({ id });
+  } else {
+    // if post doesn't exist, return 404
+    return {
+      props: { id },
+      notFound: true,
+    };
+  }
+  return {
+    props: {
+      trpcState: helpers.dehydrate(),
+      id,
+    },
+  };
+}
+
+const AnalysisReport = ({
+  id,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const [page, onChange] = useState(0);
+  const [limit, setLimit] = useState(5);
+  const [total, setTotal] = useState(0);
+  const { path, setFilePath } = useFilePathStore();
+  const [opened, { open, close }] = useDisclosure(false);
+
+  const onChangePaginiation = (val: number) => {
+    onChange(val - 1);
+  };
+
+  const pagination = usePagination({ total: total, page, onChange });
+  const { data: project } = api.projects.findById.useQuery({ id });
+  const { data: results } = api.results.getResults.useQuery({
+    projectId: id,
+    skip: page * limit,
+    limit: limit,
+  });
+  const { data: analytics } = api.results.getAnalytics.useQuery({
+    projectId: id,
+  });
+
+  useEffect(() => {
+    if (results?.count) {
+      setTotal(results.count);
+    }
+    console.log(pagination.range);
+  }, [results?.count]);
+
+  console.log(analytics);
+
   return (
     <>
+      <Modal
+        opened={opened}
+        onClose={close}
+        withCloseButton={false}
+        centered
+        size={"lg"}
+      >
+        <Title order={5}>Configure project</Title>
+
+        <Stack mt={20} mb={20} spacing={"xs"}>
+          <Text size={"sm"}>Project path</Text>
+          <TextInput
+            placeholder="this will be used to open in code"
+            icon={<IconRoad size="0.8rem" />}
+            value={path}
+            onChange={(event) => setFilePath(event.currentTarget.value)}
+          />
+
+          <Text size={"sm"}>Pagegination Limit</Text>
+          <NumberInput
+            value={limit}
+            onChange={(val: number) => setLimit(val)}
+            placeholder="pagination limit"
+            withAsterisk
+          />
+        </Stack>
+
+        <Button variant="outline" color="red" compact onClick={close}>
+          Close
+        </Button>
+      </Modal>
+
       <Container size="xl">
         <Paper
           shadow="md"
@@ -84,58 +147,96 @@ const AnalysisReport = () => {
         >
           <Group position="apart">
             <Stack>
-              <Title style={{ color: "white" }}>Report Name</Title>
-              <Text>project descriptionw ill be here</Text>
+              <Title style={{ color: "white" }}>{project?.name}</Title>
+              <Text>{project?.description}</Text>
+
+              <ActionIcon onClick={open}>
+                <IconSettings size="1.125rem" />
+              </ActionIcon>
             </Stack>
-            <Text> {new Date().toDateString()}</Text>
+            <Stack>
+              <Text> {project?.createdAt.toDateString()}</Text>
+            </Stack>
           </Group>
         </Paper>
 
         <Grid grow mt={30}>
           <Grid.Col md={6} lg={3}>
-            <Accordion
-              variant="contained"
+            <Box
               style={{
-                backgroundColor: "black",
                 position: "sticky",
                 top: 100,
                 zIndex: 200,
               }}
             >
-              <Accordion.Item value="photos">
-                <Accordion.Control
-                  icon={<IconPhoto size={rem(20)} color={"red"} />}
-                >
-                  Filetypes
-                </Accordion.Control>
-                <Accordion.Panel>Content</Accordion.Panel>
-              </Accordion.Item>
+              <Accordion
+                variant="contained"
+                style={{
+                  backgroundColor: "black",
+                }}
+              >
+                <Accordion.Item value="fileTypes">
+                  <Accordion.Control
+                    icon={<IconPhoto size={rem(20)} color={"red"} />}
+                  >
+                    Filetypes
+                  </Accordion.Control>
+                  <Accordion.Panel>
+                    <List>
+                      {analytics?.fileTypes.map((filetype) => {
+                        return (
+                          <List.Item key={randomId()}>
+                            {filetype.type} - {filetype.count}
+                          </List.Item>
+                        );
+                      })}
+                    </List>
+                  </Accordion.Panel>
+                </Accordion.Item>
 
-              <Accordion.Item value="print">
-                <Accordion.Control
-                  icon={<IconPrinter size={rem(20)} color={"blue"} />}
-                >
-                  Severity
-                </Accordion.Control>
-                <Accordion.Panel>Content</Accordion.Panel>
-              </Accordion.Item>
+                <Accordion.Item value="print">
+                  <Accordion.Control
+                    icon={<IconPrinter size={rem(20)} color={"blue"} />}
+                  >
+                    Severity
+                  </Accordion.Control>
+                  <Accordion.Panel>Content</Accordion.Panel>
+                </Accordion.Item>
 
-              <Accordion.Item value="camera">
-                <Accordion.Control
-                  icon={<IconCameraSelfie size={rem(20)} color={"teal"} />}
-                >
-                  Matchers
-                </Accordion.Control>
-                <Accordion.Panel>
-                  <Button onClick={() => alert(0)}> hi</Button>
-                </Accordion.Panel>
-              </Accordion.Item>
-            </Accordion>
+                <Accordion.Item value="camera">
+                  <Accordion.Control
+                    icon={<IconCameraSelfie size={rem(20)} color={"teal"} />}
+                  >
+                    Matchers
+                  </Accordion.Control>
+                  <Accordion.Panel>
+                    <Button onClick={() => alert(0)}> hi</Button>
+                  </Accordion.Panel>
+                </Accordion.Item>
+              </Accordion>
+
+              <Pagination
+                mt={20}
+                value={page + 1}
+                onChange={onChangePaginiation}
+                total={Math.round(total / limit) + 1}
+              />
+            </Box>
           </Grid.Col>
           <Grid.Col md={6} lg={9}>
-            {data.map((item) => (
-              <ResultCard {...item} key={item.id} />
-            ))}
+            {results?.results ? (
+              <>
+                {results.results.map((result) => {
+                  return <ResultCard {...result} key={result.id} />;
+                })}
+              </>
+            ) : (
+              <>
+                {Array.from(Array(20), (e, i) => {
+                  return <ResultCardLoader key={i} />;
+                })}
+              </>
+            )}
           </Grid.Col>
         </Grid>
       </Container>

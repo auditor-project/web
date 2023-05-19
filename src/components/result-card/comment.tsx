@@ -1,4 +1,6 @@
 import { createStyles, Text, Avatar, Group, rem, Box } from "@mantine/core";
+import { User } from "@prisma/client";
+import { timesAgo } from "~/utils/times-ago";
 
 const useStyles = createStyles((theme) => ({
   body: {
@@ -8,29 +10,31 @@ const useStyles = createStyles((theme) => ({
 }));
 
 interface CommentSimpleProps {
-  postedAt: string;
-  body: string;
-  author: {
-    name: string;
-    image: string;
-  };
+  id: string;
+  createdAt: Date;
+  user: User;
+  comment: string;
 }
 
-export function CommentDetails({ postedAt, body, author }: CommentSimpleProps) {
+export function CommentDetails({
+  comment,
+  user,
+  createdAt,
+}: CommentSimpleProps) {
   const { classes } = useStyles();
   return (
     <Box my={20}>
       <Group>
-        <Avatar src={author.image} alt={author.name} radius="xl" />
+        <Avatar src={user.image} alt={user.name as string} radius="xl" />
         <div>
-          <Text size="sm">{author.name}</Text>
+          <Text size="sm">{user.name}</Text>
           <Text size="xs" color="dimmed">
-            {postedAt}
+            {timesAgo(createdAt)}
           </Text>
         </div>
       </Group>
       <Text className={classes.body} size="sm">
-        {body}
+        {comment}
       </Text>
     </Box>
   );

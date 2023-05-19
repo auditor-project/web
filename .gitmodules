@@ -1,0 +1,6 @@
+[submodule "src/proto"]
+	path = src/proto
+	url = git@github.com:auditor-project/node-protobuf-spec.git
+[submodule "src/spec"]
+	path = src/spec
+	url = git@github.com:auditor-project/protobuf-spec.git

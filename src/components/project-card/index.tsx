@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import {
   createStyles,
   Group,
@@ -7,7 +11,9 @@ import {
   rem,
   Avatar,
 } from "@mantine/core";
+import { Project } from "@prisma/client";
 import Link from "next/link";
+import { timesAgo } from "~/utils/times-ago";
 
 const useStyles = createStyles((theme) => ({
   root: {
@@ -38,50 +44,40 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-interface IProjectDetails {
-  id: string;
-  name: string;
-  description: string;
-  createdAt: string;
-}
-
-const timesAgo = (date: Date): string => {
-  const now = new Date();
-  const delta = now.getTime() - date.getTime();
-
-  if (delta < 60000) {
-    return "just now";
-  } else if (delta < 3600000) {
-    const minutes = Math.floor(delta / 60000);
-    return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
-  } else if (delta < 86400000) {
-    const hours = Math.floor(delta / 3600000);
-    return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
-  } else {
-    const days = Math.floor(delta / 86400000);
-    return `${days} ${days === 1 ? "day" : "days"} ago`;
-  }
-};
-
-export function StatsGrid({ data }: { data: IProjectDetails[] }) {
+export function StatsGrid({ data }: { data: Project[] }) {
   const { classes } = useStyles();
-  const stats = data.map((stat) => {
+
+  const getProjectName = (name: string): string => {
+    const split = name.split(" ");
+    if (split.length >= 2) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      return `${split[0][0]}${split[1][0]}`;
+    }
+
+    return `${name[0]}${name[1]}`;
+  };
+
+  const projects = data.map((project) => {
     return (
       <Paper
         withBorder
+        style={{
+          backgroundColor: "black",
+        }}
         p="md"
         radius="md"
-        key={stat.id}
+        key={project.id}
         component={Link}
-        href={`/${stat.id}`}
+        href={`/${project.id}`}
       >
         <Group position="apart">
           <Text size="md" className={classes.title}>
-            {stat.name}
+            {project.name}
           </Text>
 
           <Avatar radius="xl" color="teal" size={"md"}>
-            EP
+            {getProjectName(project.name)}
           </Avatar>
         </Group>
 
@@ -93,7 +89,7 @@ export function StatsGrid({ data }: { data: IProjectDetails[] }) {
         </Group>
 
         <Text fz="xs" c="dimmed" mt={10}>
-          {timesAgo(new Date(stat.createdAt))}
+          {timesAgo(project.createdAt)}
         </Text>
       </Paper>
     );
@@ -105,8 +101,9 @@ export function StatsGrid({ data }: { data: IProjectDetails[] }) {
         { maxWidth: "md", cols: 2 },
         { maxWidth: "xs", cols: 1 },
       ]}
+      className="project-card"
     >
-      {stats}
+      {projects}
     </SimpleGrid>
   );
 }

@@ -1,18 +1,16 @@
-import {
-  Badge,
-  Box,
-  Button,
-  DefaultMantineColor,
-  Group,
-  Paper,
-  Stack,
-  Text,
-} from "@mantine/core";
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import { Badge, Box, Button, Group, Paper, Stack, Text } from "@mantine/core";
 import { Prism } from "@mantine/prism";
-import { Language } from "prism-react-renderer";
+import { type Language } from "prism-react-renderer";
 import { CommentDetails } from "./comment";
 import { CreateCommentComponent } from "./create-comment";
 import { useDisclosure } from "@mantine/hooks";
+import { Comments, Prisma, Results, User } from "@prisma/client";
+import { api } from "~/utils/api";
+import { useFilePathStore } from "~/store/file-path";
 
 const comment = {
   postedAt: "10 minutes ago",
@@ -24,26 +22,15 @@ const comment = {
   },
 };
 
-interface IResultCardProps {
-  id: number;
-  file: string;
-  filetype: string;
-  search: string;
-  match_str: string;
-  hits: string;
-  line: number;
-  code: (string | number | boolean)[][];
-  severity: string;
-}
-
-const generateCode = (code: (string | number | boolean)[][]) => {
+const generateCode = (code: Prisma.JsonValue) => {
   const codelines: string[] = [];
   // eslint-disable-next-line prefer-const
   let highlightLines: { color: string }[] = [];
+  const results = code as unknown as (string | number | boolean)[][];
 
-  code.forEach((line, index) => {
+  results.forEach((line, index) => {
     codelines.push(line[1] as string);
-    if (line[2] == true) {
+    if (line[2]) {
       highlightLines[index + 1] = {
         color: "yellow",
       };
@@ -63,9 +50,19 @@ const getSeverityColor = (level: string) => {
   return "gray";
 };
 
-export const ResultCard = (props: IResultCardProps) => {
-  const { code, lines } = generateCode(props.code);
+export const ResultCard = (result: Results) => {
+  const { code, lines } = generateCode(result.code);
   const [opened, { open, close }] = useDisclosure(false);
+  const { path } = useFilePathStore();
+
+  const comments = api.results.comments.useQuery({
+    resultId: result.id,
+  });
+
+  const openInCode = (file: string) => {
+    window.open(`vscode://file${file}`);
+  };
+
   return (
     <Paper
       shadow="md"
@@ -76,45 +73,58 @@ export const ResultCard = (props: IResultCardProps) => {
     >
       <Stack>
         <Group position="apart">
-          <Text size={"lg"}> {props.match_str}</Text>
-          <Badge color={getSeverityColor(props.severity)}>
-            {props.severity}
+          <Text size={"lg"}> {result.matchStr}</Text>
+          <Badge color={getSeverityColor(result.severity)}>
+            {result.severity}
           </Badge>
         </Group>
-        <Text>
-          {props.file}:<span style={{ color: "green" }}>{props.line}</span>
+        <Text
+          style={{
+            cursor: "pointer",
+          }}
+          onClick={() => {
+            openInCode(`${path ? path : ""}/${result.file.split("/").at(-1)}`);
+          }}
+        >
+          {path}
+          {result.file.split("/").at(-1)}:
+          <span style={{ color: "green" }}>{result.line}</span>
         </Text>
       </Stack>
 
-      <Prism.Tabs defaultValue={props.file.split("/").slice(-1)[0]} mt={20}>
+      <Prism.Tabs defaultValue={result.file.split("/").slice(-1)[0]} mt={20}>
         <Prism.TabsList>
-          <Prism.Tab value={props.file.split("/").slice(-1)[0] as string}>
-            {props.file.split("/").slice(-1)[0]}
+          <Prism.Tab value={result.file.split("/").slice(-1)[0] as string}>
+            {result.file.split("/").slice(-1)[0]}
           </Prism.Tab>
         </Prism.TabsList>
 
         <Prism.Panel
-          language={props.filetype as Language}
+          language={result.filetype as Language}
           withLineNumbers
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           //@ts-ignore
           highlightLines={lines}
-          value={props.file.split("/").slice(-1)[0] as string}
+          value={result.file.split("/").slice(-1)[0] as string}
         >
           {code}
         </Prism.Panel>
       </Prism.Tabs>
 
       <Box>
-        <CommentDetails {...comment} />
-        <CommentDetails {...comment} />
-        <CommentDetails {...comment} />
-        <CommentDetails {...comment} />
+        {comments.isLoading && <Text>Loading...</Text>}
+        {comments.data && (
+          <>
+            {comments.data.map((comment) => {
+              return <CommentDetails {...comment} key={comment.id} />;
+            })}
+          </>
+        )}
       </Box>
 
-      {opened && <CreateCommentComponent />}
+      {opened && <CreateCommentComponent close={close} resultId={result.id} />}
       {!opened && (
-        <Button variant="light" color="gray" compact onClick={open}>
+        <Button variant="light" color="gray" compact onClick={open} mt={20}>
           Add comment
         </Button>
       )}
