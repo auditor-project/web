@@ -13,4 +13,5 @@ export const fileContentTypes = {
   ".woff": "font/woff",
   ".woff2": "font/woff2",
   ".zip": "application/zip",
+  ".yaml": "application/x-yaml",
 };
