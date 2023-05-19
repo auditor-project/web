@@ -11,14 +11,13 @@ import {
   Button,
   Pagination,
   Box,
-  SimpleGrid,
   Modal,
   ActionIcon,
-  Input,
   TextInput,
   NumberInput,
+  List,
 } from "@mantine/core";
-import { useDisclosure, usePagination } from "@mantine/hooks";
+import { randomId, useDisclosure, usePagination } from "@mantine/hooks";
 import {
   IconCameraSelfie,
   IconPhoto,
@@ -28,7 +27,7 @@ import {
 } from "@tabler/icons-react";
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import {
-  InferGetServerSidePropsType,
+  type InferGetServerSidePropsType,
   type GetServerSidePropsContext,
 } from "next";
 import { useEffect, useState } from "react";
@@ -91,6 +90,9 @@ const AnalysisReport = ({
     skip: page * limit,
     limit: limit,
   });
+  const { data: analytics } = api.results.getAnalytics.useQuery({
+    projectId: id,
+  });
 
   useEffect(() => {
     if (results?.count) {
@@ -98,6 +100,8 @@ const AnalysisReport = ({
     }
     console.log(pagination.range);
   }, [results?.count]);
+
+  console.log(analytics);
 
   return (
     <>
@@ -171,13 +175,23 @@ const AnalysisReport = ({
                   backgroundColor: "black",
                 }}
               >
-                <Accordion.Item value="photos">
+                <Accordion.Item value="fileTypes">
                   <Accordion.Control
                     icon={<IconPhoto size={rem(20)} color={"red"} />}
                   >
                     Filetypes
                   </Accordion.Control>
-                  <Accordion.Panel>Content</Accordion.Panel>
+                  <Accordion.Panel>
+                    <List>
+                      {analytics?.fileTypes.map((filetype) => {
+                        return (
+                          <List.Item key={randomId()}>
+                            {filetype.type} - {filetype.count}
+                          </List.Item>
+                        );
+                      })}
+                    </List>
+                  </Accordion.Panel>
                 </Accordion.Item>
 
                 <Accordion.Item value="print">

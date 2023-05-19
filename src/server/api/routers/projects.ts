@@ -1,13 +1,18 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { z } from "zod";
+import * as grpc from "@grpc/grpc-js";
 
 import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
+import { env } from "~/env.mjs";
+import { AuditStartRequest } from "~/proto/parser";
+import { AuditorService } from "~/server/grpc-service";
 
 export const projectRouter = createTRPCRouter({
   projects: protectedProcedure
@@ -70,11 +75,28 @@ export const projectRouter = createTRPCRouter({
           });
         }
 
-        return await ctx.prisma.project.create({
+        const createdProject = await ctx.prisma.project.create({
           data: {
             ...rest,
           },
         });
+
+        const data: AuditStartRequest = {
+          fileName: createdProject.sourceCodeUrl,
+          projectId: createdProject.id,
+          signature: createdProject.signatureFile,
+        };
+
+        const auditorService = new AuditorService();
+        const { client, error } = await auditorService.auditStartProcessor(
+          data
+        );
+
+        return {
+          ...createdProject,
+          client,
+          error,
+        };
       } catch (err) {
         console.log(err);
         throw err;

@@ -31,6 +31,55 @@ export const resultsRouter = createTRPCRouter({
       };
     }),
 
+  getAnalytics: protectedProcedure
+    .input(z.object({ projectId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const severityCounts = await ctx.prisma.results.groupBy({
+        by: ["severity"],
+        where: {
+          projectId: input.projectId,
+        },
+        _count: {
+          severity: true,
+        },
+      });
+
+      const fileTypeCounts = await ctx.prisma.results.groupBy({
+        by: ["filetype"],
+        _count: {
+          filetype: true,
+        },
+      });
+
+      const matchStrCounts = await ctx.prisma.results.groupBy({
+        by: ["matchStr"],
+        _count: {
+          matchStr: true,
+        },
+      });
+
+      const severityResults = severityCounts.map((result) => ({
+        type: result.severity,
+        total: result._count.severity,
+      }));
+
+      const fileTypeResults = fileTypeCounts.map((result) => ({
+        type: result.filetype,
+        count: result._count.filetype,
+      }));
+
+      const matchStrResults = matchStrCounts.map((result) => ({
+        type: result.matchStr,
+        count: result._count.matchStr,
+      }));
+
+      return {
+        severity: severityResults,
+        fileTypes: fileTypeResults,
+        hits: matchStrResults,
+      };
+    }),
+
   comments: protectedProcedure
     .input(z.object({ resultId: z.string() }))
     .query(({ input, ctx }) => {

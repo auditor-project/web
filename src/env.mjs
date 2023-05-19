@@ -30,6 +30,7 @@ const server = z.object({
   BULK_SAVE_API_KEY: z.string(),
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
+  PROCESSOR_SERVICE_HOST: z.string(),
 });
 
 /**
@@ -62,6 +63,7 @@ const processEnv = {
   BULK_SAVE_API_KEY: process.env.BULK_SAVE_API_KEY,
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+  PROCESSOR_SERVICE_HOST: process.env.PROCESSOR_SERVICE_HOST,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 };
 
