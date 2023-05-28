@@ -16,10 +16,12 @@ import {
   TextInput,
   NumberInput,
   List,
+  PasswordInput,
 } from "@mantine/core";
 import { randomId, useDisclosure, usePagination } from "@mantine/hooks";
 import {
   IconCameraSelfie,
+  IconKey,
   IconPhoto,
   IconPrinter,
   IconRoad,
@@ -38,6 +40,7 @@ import { DashboardLayout } from "~/layouts/dashboard";
 import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
 import { useFilePathStore } from "~/store/file-path";
+import { useOpenAiKeyStore } from "~/store/open-ai";
 import { api } from "~/utils/api";
 
 export async function getServerSideProps(
@@ -77,6 +80,7 @@ const AnalysisReport = ({
   const [limit, setLimit] = useState(5);
   const [total, setTotal] = useState(0);
   const { path, setFilePath } = useFilePathStore();
+  const { key, setKey } = useOpenAiKeyStore();
   const [opened, { open, close }] = useDisclosure(false);
 
   const onChangePaginiation = (val: number) => {
@@ -127,6 +131,15 @@ const AnalysisReport = ({
             onChange={(val: number) => setLimit(val)}
             placeholder="pagination limit"
             withAsterisk
+          />
+
+          <Text size={"sm"}>OpenAI API Key</Text>
+          <PasswordInput
+            description="OpenAI Api key is required to enable auditor assistant"
+            placeholder="OpenAI key"
+            icon={<IconKey size="0.8rem" />}
+            value={key}
+            onChange={(event) => setKey(event.currentTarget.value)}
           />
         </Stack>
 

@@ -8,6 +8,7 @@ import {
   Button,
   Group,
   Loader,
+  Modal,
   Paper,
   Select,
   Stack,
@@ -18,11 +19,13 @@ import { type Language } from "prism-react-renderer";
 import { CommentDetails } from "./comment";
 import { CreateCommentComponent } from "./create-comment";
 import { useDisclosure } from "@mantine/hooks";
-import { Comments, Prisma, Results, User } from "@prisma/client";
+import { type Comments, Prisma, Results, User } from "@prisma/client";
 import { api } from "~/utils/api";
 import { useFilePathStore } from "~/store/file-path";
 import { useEffect, useState } from "react";
 import { stat } from "fs";
+import { useOpenAiKeyStore } from "~/store/open-ai";
+import { OpenAiComponent } from "./open-ai";
 
 const comment = {
   postedAt: "10 minutes ago",
@@ -66,7 +69,10 @@ export const ResultCard = (result: Results) => {
   const { code, lines } = generateCode(result.code);
   const [severity, setSeverity] = useState<string | null>(result.severity);
   const [opened, { open, close }] = useDisclosure(false);
+  const [showOpenAi, { open: openAiShow, close: openAiClose }] =
+    useDisclosure(false);
   const { path } = useFilePathStore();
+  const { key } = useOpenAiKeyStore();
 
   const comments = api.results.comments.useQuery({
     resultId: result.id,
@@ -89,90 +95,127 @@ export const ResultCard = (result: Results) => {
   };
 
   return (
-    <Paper
-      shadow="md"
-      withBorder
-      sx={{ backgroundColor: "black" }}
-      p={15}
-      mb={20}
-    >
-      <Stack>
-        <Group position="apart">
-          <Stack>
-            <Text size={"lg"}> {result.matchStr}</Text>
-            {severityUpdate.isLoading ? (
-              <Loader size="sm" />
-            ) : (
-              <Badge
-                color={getSeverityColor(severity ? severity : "not-marked")}
-              >
-                {severity}
-              </Badge>
-            )}
-          </Stack>
-
-          <Select
-            value={severity}
-            // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            onChange={updateSetSeverity}
-            data={[
-              { value: "not-marked", label: "Not Marked" },
-              { value: "low", label: "Low" },
-              { value: "medium", label: "Medium" },
-              { value: "high", label: "High" },
-            ]}
+    <>
+      <Modal
+        opened={showOpenAi}
+        onClose={openAiClose}
+        withCloseButton={false}
+        centered
+        size={"lg"}
+      >
+        {result && (
+          <OpenAiComponent
+            close={openAiClose}
+            code={code}
+            match={result.matchStr}
+            hits={result.hits}
+            search={result.search}
           />
-        </Group>
-        <Text
-          style={{
-            cursor: "pointer",
-          }}
-          onClick={() => {
-            openInCode(`${path ? path : ""}/${result.file.split("/").at(-1)}`);
-          }}
-        >
-          {path}
-          {result.file.split("/").at(-1)}:
-          <span style={{ color: "green" }}>{result.line}</span>
-        </Text>
-      </Stack>
-
-      <Prism.Tabs defaultValue={result.file.split("/").slice(-1)[0]} mt={20}>
-        <Prism.TabsList>
-          <Prism.Tab value={result.file.split("/").slice(-1)[0] as string}>
-            {result.file.split("/").slice(-1)[0]}
-          </Prism.Tab>
-        </Prism.TabsList>
-
-        <Prism.Panel
-          language={result.filetype as Language}
-          withLineNumbers
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          //@ts-ignore
-          highlightLines={lines}
-          value={result.file.split("/").slice(-1)[0] as string}
-        >
-          {code}
-        </Prism.Panel>
-      </Prism.Tabs>
-
-      <Box>
-        {comments.isLoading && <Text>Loading...</Text>}
-        {comments.data && (
-          <>
-            {comments.data.map((comment) => {
-              return <CommentDetails {...comment} key={comment.id} />;
-            })}
-          </>
         )}
-      </Box>
+      </Modal>
 
-      {opened && <CreateCommentComponent close={close} resultId={result.id} />}
-      {!opened && (
-        <Button variant="light" color="gray" compact onClick={open} mt={20}>
-          Add comment
-        </Button>
-      )}
-    </Paper>
+      <Paper
+        shadow="md"
+        withBorder
+        sx={{ backgroundColor: "black" }}
+        p={15}
+        mb={20}
+      >
+        <Stack>
+          <Group position="apart">
+            <Stack>
+              <Text size={"lg"}> {result.matchStr}</Text>
+              {severityUpdate.isLoading ? (
+                <Loader size="sm" />
+              ) : (
+                <Badge
+                  color={getSeverityColor(severity ? severity : "not-marked")}
+                >
+                  {severity}
+                </Badge>
+              )}
+            </Stack>
+
+            <Select
+              value={severity}
+              // eslint-disable-next-line @typescript-eslint/no-misused-promises
+              onChange={updateSetSeverity}
+              data={[
+                { value: "not-marked", label: "Not Marked" },
+                { value: "low", label: "Low" },
+                { value: "medium", label: "Medium" },
+                { value: "high", label: "High" },
+              ]}
+            />
+          </Group>
+
+          <Text
+            style={{
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              openInCode(
+                `${path ? path : ""}/${result.file.split("/").at(-1)}`
+              );
+            }}
+          >
+            {path}
+            {result.file.split("/").at(-1)}:
+            <span style={{ color: "green" }}>{result.line}</span>
+          </Text>
+
+          {key && (
+            <Button
+              variant="light"
+              color="gray"
+              compact
+              onClick={openAiShow}
+              style={{ width: 100 }}
+            >
+              Ask OpenAi
+            </Button>
+          )}
+        </Stack>
+
+        <Prism.Tabs defaultValue={result.file.split("/").slice(-1)[0]} mt={20}>
+          <Prism.TabsList>
+            <Prism.Tab value={result.file.split("/").slice(-1)[0] as string}>
+              {result.file.split("/").slice(-1)[0]}
+            </Prism.Tab>
+          </Prism.TabsList>
+
+          <Prism.Panel
+            language={result.filetype as Language}
+            withLineNumbers
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            //@ts-ignore
+            highlightLines={lines}
+            value={result.file.split("/").slice(-1)[0] as string}
+          >
+            {code}
+          </Prism.Panel>
+        </Prism.Tabs>
+
+        <Box>
+          {comments.isLoading && <Text>Loading...</Text>}
+          {comments.data && (
+            <>
+              {comments.data.map((comment) => {
+                return <CommentDetails {...comment} key={comment.id} />;
+              })}
+            </>
+          )}
+        </Box>
+
+        {opened && (
+          <CreateCommentComponent close={close} resultId={result.id} />
+        )}
+        {!opened && (
+          <Button variant="light" color="gray" compact onClick={open} mt={20}>
+            Add comment
+          </Button>
+        )}
+      </Paper>
+    </>
   );
 };
