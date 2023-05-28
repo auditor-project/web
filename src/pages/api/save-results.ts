@@ -9,6 +9,14 @@ import { prisma } from "~/server/db";
 
 const API_KEY_HEADER = "x-api-token";
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: "5000mb",
+    },
+  },
+};
+
 export const schema = z.object({
   projectId: z.string(),
   results: z.array(
@@ -46,7 +54,11 @@ export default async function handler(
     });
   }
 
+  console.log("==== saving results =====");
+
   const response = schema.safeParse(req.body);
+
+  console.log(response);
 
   if (!response.success) {
     const { errors } = response.error;

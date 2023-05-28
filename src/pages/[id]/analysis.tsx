@@ -39,6 +39,7 @@ import { ResultCardLoader } from "~/components/result-card/loader";
 import { DashboardLayout } from "~/layouts/dashboard";
 import { appRouter } from "~/server/api/root";
 import { prisma } from "~/server/db";
+import { useVisibilityStore } from "~/store/code-visibility";
 import { useFilePathStore } from "~/store/file-path";
 import { useOpenAiKeyStore } from "~/store/open-ai";
 import { api } from "~/utils/api";
@@ -81,6 +82,7 @@ const AnalysisReport = ({
   const [total, setTotal] = useState(0);
   const { path, setFilePath } = useFilePathStore();
   const { key, setKey } = useOpenAiKeyStore();
+  const { count, setVisibility } = useVisibilityStore();
   const [opened, { open, close }] = useDisclosure(false);
 
   const onChangePaginiation = (val: number) => {
@@ -130,6 +132,15 @@ const AnalysisReport = ({
             value={limit}
             onChange={(val: number) => setLimit(val)}
             placeholder="pagination limit"
+            withAsterisk
+          />
+
+          <Text size={"sm"}>Code Visibility</Text>
+          <NumberInput
+            value={count}
+            onChange={(val: number) => setVisibility(val)}
+            placeholder="pagination limit"
+            description="number of lines to show in code block from hit and after hit"
             withAsterisk
           />
 

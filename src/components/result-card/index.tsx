@@ -26,18 +26,9 @@ import { useEffect, useState } from "react";
 import { stat } from "fs";
 import { useOpenAiKeyStore } from "~/store/open-ai";
 import { OpenAiComponent } from "./open-ai";
+import { useVisibilityStore } from "~/store/code-visibility";
 
-const comment = {
-  postedAt: "10 minutes ago",
-  body: "This Pokémon likes to lick its palms that are sweetened by being soaked in honey. Teddiursa concocts its own honey by blending fruits and pollen collected by Beedrill. Blastoise has water spouts that protrude from its shell. The water spouts are very accurate.",
-  author: {
-    name: "Jacob Warnhalter",
-    image:
-      "https://images.unsplash.com/photo-1624298357597-fd92dfbec01d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=250&q=80",
-  },
-};
-
-const generateCode = (code: Prisma.JsonValue) => {
+const generateCode = (code: Prisma.JsonValue, visibility: number) => {
   const codelines: string[] = [];
   // eslint-disable-next-line prefer-const
   let highlightLines: { color: string }[] = [];
@@ -52,9 +43,26 @@ const generateCode = (code: Prisma.JsonValue) => {
     }
   });
 
+  const highlightedIndices = Object.keys(highlightLines).map(Number);
+  const startIndex = Math.max(0, Math.min(...highlightedIndices) - 5);
+  const endIndex = Math.min(
+    results.length - 1,
+    Math.max(...highlightedIndices) + 5
+  );
+
+  const highlightedCode = codelines.slice(startIndex, endIndex + 1);
+  const lines = {};
+
+  highlightedIndices.forEach((index) => {
+    const lineIndex = index - startIndex;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    lines[lineIndex] = highlightLines[index];
+  });
+
   return {
-    code: codelines.join("\n"),
-    lines: highlightLines,
+    code: highlightedCode.join("\n"),
+    lines,
   };
 };
 
@@ -66,7 +74,8 @@ const getSeverityColor = (level: string) => {
 };
 
 export const ResultCard = (result: Results) => {
-  const { code, lines } = generateCode(result.code);
+  const { count } = useVisibilityStore();
+  const { code, lines } = generateCode(result.code, count);
   const [severity, setSeverity] = useState<string | null>(result.severity);
   const [opened, { open, close }] = useDisclosure(false);
   const [showOpenAi, { open: openAiShow, close: openAiClose }] =
@@ -175,26 +184,33 @@ export const ResultCard = (result: Results) => {
               Ask OpenAi
             </Button>
           )}
-        </Stack>
 
-        <Prism.Tabs defaultValue={result.file.split("/").slice(-1)[0]} mt={20}>
-          <Prism.TabsList>
-            <Prism.Tab value={result.file.split("/").slice(-1)[0] as string}>
-              {result.file.split("/").slice(-1)[0]}
-            </Prism.Tab>
-          </Prism.TabsList>
-
-          <Prism.Panel
-            language={result.filetype as Language}
-            withLineNumbers
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            //@ts-ignore
-            highlightLines={lines}
-            value={result.file.split("/").slice(-1)[0] as string}
+          <Prism.Tabs
+            defaultValue={result.file.split("/").slice(-1)[0]}
+            mt={20}
           >
-            {code}
-          </Prism.Panel>
-        </Prism.Tabs>
+            <Prism.TabsList>
+              <Prism.Tab value={result.file.split("/").slice(-1)[0] as string}>
+                {result.file.split("/").slice(-1)[0]}
+              </Prism.Tab>
+            </Prism.TabsList>
+
+            <Prism.Panel
+              language={result.filetype as Language}
+              withLineNumbers
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              //@ts-ignore
+              highlightLines={lines}
+              value={result.file.split("/").slice(-1)[0] as string}
+              scrollAreaComponent="div"
+              style={{
+                maxWidth: 930,
+              }}
+            >
+              {code}
+            </Prism.Panel>
+          </Prism.Tabs>
+        </Stack>
 
         <Box>
           {comments.isLoading && <Text>Loading...</Text>}

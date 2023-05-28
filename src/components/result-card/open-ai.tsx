@@ -6,7 +6,6 @@ import {
   Loader,
   Paper,
   Stack,
-  Text,
   Textarea,
   Title,
   useMantineTheme,
