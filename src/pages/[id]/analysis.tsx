@@ -17,6 +17,7 @@ import {
   NumberInput,
   List,
   PasswordInput,
+  Switch,
 } from "@mantine/core";
 import { randomId, useDisclosure, usePagination } from "@mantine/hooks";
 import {
@@ -84,6 +85,7 @@ const AnalysisReport = ({
   const { key, setKey } = useOpenAiKeyStore();
   const { count, setVisibility } = useVisibilityStore();
   const [opened, { open, close }] = useDisclosure(false);
+  const [withIgnore, setWithIgnore] = useState(false);
 
   const onChangePaginiation = (val: number) => {
     onChange(val - 1);
@@ -95,6 +97,7 @@ const AnalysisReport = ({
     projectId: id,
     skip: page * limit,
     limit: limit,
+    withIgnore,
   });
   const { data: analytics } = api.results.getAnalytics.useQuery({
     projectId: id,
@@ -262,6 +265,13 @@ const AnalysisReport = ({
                 my={20}
                 placeholder="Code visibility"
                 description="number of lines to show in code block from hit and after hit"
+              />
+
+              <Switch
+                checked={withIgnore}
+                my={20}
+                label="Show ignored results"
+                onChange={(event) => setWithIgnore(event.currentTarget.checked)}
               />
 
               <Pagination

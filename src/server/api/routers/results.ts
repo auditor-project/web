@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { z } from "zod";
 
 import {
@@ -9,15 +10,37 @@ import {
 export const resultsRouter = createTRPCRouter({
   getResults: protectedProcedure
     .input(
-      z.object({ projectId: z.string(), limit: z.number(), skip: z.number() })
+      z.object({
+        projectId: z.string(),
+        limit: z.number(),
+        skip: z.number(),
+        withIgnore: z.boolean(),
+      })
     )
     .query(async ({ input, ctx }) => {
+      let whereCondition: any = {
+        projectId: input.projectId,
+      };
+
+      if (input.withIgnore) {
+        // Remove the condition for "severity" value if withIgnore is true
+        whereCondition = {
+          ...whereCondition,
+        };
+      } else {
+        // Ignore the values where severity is "ignored"
+        whereCondition = {
+          ...whereCondition,
+          severity: {
+            not: "ignored",
+          },
+        };
+      }
+
       const results = await ctx.prisma.results.findMany({
         skip: input.skip,
         take: input.limit,
-        where: {
-          projectId: input.projectId,
-        },
+        where: whereCondition,
       });
       const total = await ctx.prisma.results.count({
         where: {

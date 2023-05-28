@@ -150,6 +150,7 @@ export const ResultCard = (result: Results) => {
               onChange={updateSetSeverity}
               data={[
                 { value: "not-marked", label: "Not Marked" },
+                { value: "ignored", label: "Ignore" },
                 { value: "low", label: "Low" },
                 { value: "medium", label: "Medium" },
                 { value: "high", label: "High" },
