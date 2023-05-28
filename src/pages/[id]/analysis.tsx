@@ -18,6 +18,7 @@ import {
   List,
   PasswordInput,
   Switch,
+  Checkbox,
 } from "@mantine/core";
 import { randomId, useDisclosure, usePagination } from "@mantine/hooks";
 import {
@@ -75,6 +76,14 @@ export async function getServerSideProps(
   };
 }
 
+const SeverityFilterData = [
+  { value: "high", label: "High" },
+  { value: "medium", label: "Medium" },
+  { value: "low", label: "Low" },
+  { value: "ignored", label: "Ignore" },
+  { value: "not-marked", label: "Not Marked" },
+];
+
 const AnalysisReport = ({
   id,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
@@ -86,6 +95,23 @@ const AnalysisReport = ({
   const { count, setVisibility } = useVisibilityStore();
   const [opened, { open, close }] = useDisclosure(false);
   const [withIgnore, setWithIgnore] = useState(false);
+  const [severityFilter, setSeverityFilter] = useState<Array<string>>([
+    "not-marked",
+    "ignored",
+    "low",
+    "medium",
+    "high",
+  ]);
+
+  const handleChangeSeverityFilter = (value: string) => {
+    setSeverityFilter((prevSelectedValues) => {
+      if (prevSelectedValues.includes(value)) {
+        return prevSelectedValues.filter((v) => v !== value);
+      } else {
+        return [...prevSelectedValues, value];
+      }
+    });
+  };
 
   const onChangePaginiation = (val: number) => {
     onChange(val - 1);
@@ -97,7 +123,7 @@ const AnalysisReport = ({
     projectId: id,
     skip: page * limit,
     limit: limit,
-    withIgnore,
+    severityFilter: severityFilter,
   });
   const { data: analytics } = api.results.getAnalytics.useQuery({
     projectId: id,
@@ -267,15 +293,18 @@ const AnalysisReport = ({
                 description="number of lines to show in code block from hit and after hit"
               />
 
-              <Switch
-                checked={withIgnore}
-                my={20}
-                label="Show ignored results"
-                onChange={(event) => setWithIgnore(event.currentTarget.checked)}
-              />
+              {SeverityFilterData.map((filter) => (
+                <Checkbox
+                  key={filter.value}
+                  checked={severityFilter.includes(filter.value)}
+                  onChange={() => handleChangeSeverityFilter(filter.value)}
+                  label={filter.label}
+                  mt={10}
+                />
+              ))}
 
               <Pagination
-                mt={20}
+                mt={30}
                 value={page + 1}
                 onChange={onChangePaginiation}
                 total={Math.round(total / limit) + 1}

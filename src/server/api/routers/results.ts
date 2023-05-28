@@ -14,7 +14,7 @@ export const resultsRouter = createTRPCRouter({
         projectId: z.string(),
         limit: z.number(),
         skip: z.number(),
-        withIgnore: z.boolean(),
+        severityFilter: z.array(z.string()).optional(),
       })
     )
     .query(async ({ input, ctx }) => {
@@ -22,17 +22,11 @@ export const resultsRouter = createTRPCRouter({
         projectId: input.projectId,
       };
 
-      if (input.withIgnore) {
-        // Remove the condition for "severity" value if withIgnore is true
-        whereCondition = {
-          ...whereCondition,
-        };
-      } else {
-        // Ignore the values where severity is "ignored"
+      if (input.severityFilter) {
         whereCondition = {
           ...whereCondition,
           severity: {
-            not: "ignored",
+            in: input.severityFilter,
           },
         };
       }

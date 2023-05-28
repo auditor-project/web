@@ -77,6 +77,7 @@ export const ResultCard = (result: Results) => {
   const { code, lines } = generateCode(result.code, count);
   const [severity, setSeverity] = useState<string | null>(result.severity);
   const [opened, { open, close }] = useDisclosure(false);
+
   const [showOpenAi, { open: openAiShow, close: openAiClose }] =
     useDisclosure(false);
   const { path } = useFilePathStore();

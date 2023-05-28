@@ -101,11 +101,11 @@ model Project {
 
 model Results {
     id        String     @id @default(cuid())
-    file      String
-    filetype  String
-    search    String
+    file      String     @db.Text
+    filetype  String     @db.Text
+    search    String     @db.Text
     matchStr  String     @map("match_str")
-    hits      String
+    hits      String     @db.Text
     line      Int
     code      Json
     severity  String
