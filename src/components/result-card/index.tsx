@@ -101,7 +101,7 @@ export const ResultCard = (result: Results) => {
         onClose={openAiClose}
         withCloseButton={false}
         centered
-        size={"lg"}
+        size={"xl"}
       >
         {result && (
           <OpenAiComponent
