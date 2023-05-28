@@ -1,5 +1,5 @@
 import { createStyles, Text, Avatar, Group, rem, Box } from "@mantine/core";
-import { User } from "@prisma/client";
+import { type User } from "@prisma/client";
 import { timesAgo } from "~/utils/times-ago";
 
 const useStyles = createStyles((theme) => ({
