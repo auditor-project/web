@@ -94,7 +94,6 @@ const AnalysisReport = ({
   const { key, setKey } = useOpenAiKeyStore();
   const { count, setVisibility } = useVisibilityStore();
   const [opened, { open, close }] = useDisclosure(false);
-  const [withIgnore, setWithIgnore] = useState(false);
   const [severityFilter, setSeverityFilter] = useState<Array<string>>([
     "not-marked",
     "ignored",
@@ -134,7 +133,7 @@ const AnalysisReport = ({
       setTotal(results.count);
     }
     console.log(pagination.range);
-  }, [results?.count]);
+  }, [pagination.range, results]);
 
   return (
     <>

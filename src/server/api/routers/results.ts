@@ -37,9 +37,7 @@ export const resultsRouter = createTRPCRouter({
         where: whereCondition,
       });
       const total = await ctx.prisma.results.count({
-        where: {
-          projectId: input.projectId,
-        },
+        where: whereCondition,
       });
 
       return {
