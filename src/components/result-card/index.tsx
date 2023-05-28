@@ -27,6 +27,8 @@ import { useOpenAiKeyStore } from "~/store/open-ai";
 import { OpenAiComponent } from "./open-ai";
 import { useVisibilityStore } from "~/store/code-visibility";
 
+const AUDITOR_TEMP_PATH_PATTERN = /auditor-\d+\//;
+
 const generateCode = (code: Prisma.JsonValue, visibility: number) => {
   const codelines: string[] = [];
   // eslint-disable-next-line prefer-const
@@ -164,13 +166,11 @@ export const ResultCard = (result: Results) => {
               cursor: "pointer",
             }}
             onClick={() => {
-              openInCode(
-                `${path ? path : ""}/${result.file.split("/").at(-1)}`
-              );
+              openInCode(`${path}${result.file.split(/auditor-\d+\//)[1]}`);
             }}
           >
             {path}
-            {result.file.split("/").at(-1)}:
+            {result.file.split(/auditor-\d+\//)[1]}:
             <span style={{ color: "green" }}>{result.line}</span>
           </Text>
 
