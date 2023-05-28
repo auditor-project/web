@@ -146,7 +146,7 @@ export const OpenAiComponent = ({
             compact
             onClick={() => {
               void agent.addUserQuestion(value);
-              setValue("'");
+              setValue("");
             }}
             style={{
               width: "30%",
