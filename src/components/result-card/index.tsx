@@ -22,8 +22,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { type Comments, Prisma, Results, User } from "@prisma/client";
 import { api } from "~/utils/api";
 import { useFilePathStore } from "~/store/file-path";
-import { useEffect, useState } from "react";
-import { stat } from "fs";
+import { useState } from "react";
 import { useOpenAiKeyStore } from "~/store/open-ai";
 import { OpenAiComponent } from "./open-ai";
 import { useVisibilityStore } from "~/store/code-visibility";
@@ -44,10 +43,10 @@ const generateCode = (code: Prisma.JsonValue, visibility: number) => {
   });
 
   const highlightedIndices = Object.keys(highlightLines).map(Number);
-  const startIndex = Math.max(0, Math.min(...highlightedIndices) - 5);
+  const startIndex = Math.max(0, Math.min(...highlightedIndices) - visibility);
   const endIndex = Math.min(
     results.length - 1,
-    Math.max(...highlightedIndices) + 5
+    Math.max(...highlightedIndices) + visibility
   );
 
   const highlightedCode = codelines.slice(startIndex, endIndex + 1);

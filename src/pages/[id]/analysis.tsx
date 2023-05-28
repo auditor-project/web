@@ -139,7 +139,7 @@ const AnalysisReport = ({
           <NumberInput
             value={count}
             onChange={(val: number) => setVisibility(val)}
-            placeholder="pagination limit"
+            placeholder="Code visibility"
             description="number of lines to show in code block from hit and after hit"
             withAsterisk
           />
@@ -254,6 +254,15 @@ const AnalysisReport = ({
                   </Accordion.Panel>
                 </Accordion.Item>
               </Accordion>
+
+              <NumberInput
+                value={count}
+                onChange={(val: number) => setVisibility(val)}
+                label="Code visibility"
+                my={20}
+                placeholder="Code visibility"
+                description="number of lines to show in code block from hit and after hit"
+              />
 
               <Pagination
                 mt={20}
