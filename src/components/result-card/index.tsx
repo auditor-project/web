@@ -2,7 +2,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Badge, Box, Button, Group, Paper, Stack, Text } from "@mantine/core";
+import {
+  Badge,
+  Box,
+  Button,
+  Group,
+  Loader,
+  Paper,
+  Select,
+  Stack,
+  Text,
+} from "@mantine/core";
 import { Prism } from "@mantine/prism";
 import { type Language } from "prism-react-renderer";
 import { CommentDetails } from "./comment";
@@ -11,6 +21,8 @@ import { useDisclosure } from "@mantine/hooks";
 import { Comments, Prisma, Results, User } from "@prisma/client";
 import { api } from "~/utils/api";
 import { useFilePathStore } from "~/store/file-path";
+import { useEffect, useState } from "react";
+import { stat } from "fs";
 
 const comment = {
   postedAt: "10 minutes ago",
@@ -52,15 +64,28 @@ const getSeverityColor = (level: string) => {
 
 export const ResultCard = (result: Results) => {
   const { code, lines } = generateCode(result.code);
+  const [severity, setSeverity] = useState<string | null>(result.severity);
   const [opened, { open, close }] = useDisclosure(false);
   const { path } = useFilePathStore();
 
   const comments = api.results.comments.useQuery({
     resultId: result.id,
   });
+  const severityUpdate = api.results.updateSeverity.useMutation();
 
   const openInCode = (file: string) => {
     window.open(`vscode://file${file}`);
+  };
+
+  const updateSetSeverity = async (status: string | null) => {
+    if (status) {
+      await severityUpdate.mutateAsync({
+        resultId: result.id,
+        status,
+      });
+
+      setSeverity(status);
+    }
   };
 
   return (
@@ -73,10 +98,30 @@ export const ResultCard = (result: Results) => {
     >
       <Stack>
         <Group position="apart">
-          <Text size={"lg"}> {result.matchStr}</Text>
-          <Badge color={getSeverityColor(result.severity)}>
-            {result.severity}
-          </Badge>
+          <Stack>
+            <Text size={"lg"}> {result.matchStr}</Text>
+            {severityUpdate.isLoading ? (
+              <Loader size="sm" />
+            ) : (
+              <Badge
+                color={getSeverityColor(severity ? severity : "not-marked")}
+              >
+                {severity}
+              </Badge>
+            )}
+          </Stack>
+
+          <Select
+            value={severity}
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onChange={updateSetSeverity}
+            data={[
+              { value: "not-marked", label: "Not Marked" },
+              { value: "low", label: "Low" },
+              { value: "medium", label: "Medium" },
+              { value: "high", label: "High" },
+            ]}
+          />
         </Group>
         <Text
           style={{

@@ -107,6 +107,20 @@ export const resultsRouter = createTRPCRouter({
       });
     }),
 
+  updateSeverity: protectedProcedure
+    .input(z.object({ resultId: z.string(), status: z.string() }))
+    .mutation(({ input, ctx }) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+      return ctx.prisma.results.update({
+        where: {
+          id: input.resultId,
+        },
+        data: {
+          severity: input.status,
+        },
+      });
+    }),
+
   getAll: publicProcedure.query(({ ctx }) => {
     return ctx.prisma.example.findMany();
   }),

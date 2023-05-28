@@ -101,8 +101,6 @@ const AnalysisReport = ({
     console.log(pagination.range);
   }, [results?.count]);
 
-  console.log(analytics);
-
   return (
     <>
       <Modal
@@ -200,7 +198,17 @@ const AnalysisReport = ({
                   >
                     Severity
                   </Accordion.Control>
-                  <Accordion.Panel>Content</Accordion.Panel>
+                  <Accordion.Panel>
+                    <List>
+                      {analytics?.severity.map((severity) => {
+                        return (
+                          <List.Item key={randomId()}>
+                            {severity.type} - {severity.total}
+                          </List.Item>
+                        );
+                      })}
+                    </List>
+                  </Accordion.Panel>
                 </Accordion.Item>
 
                 <Accordion.Item value="camera">
@@ -210,7 +218,15 @@ const AnalysisReport = ({
                     Matchers
                   </Accordion.Control>
                   <Accordion.Panel>
-                    <Button onClick={() => alert(0)}> hi</Button>
+                    <List>
+                      {analytics?.hits.map((hit) => {
+                        return (
+                          <List.Item key={randomId()}>
+                            {hit.type} - {hit.count}
+                          </List.Item>
+                        );
+                      })}
+                    </List>
                   </Accordion.Panel>
                 </Accordion.Item>
               </Accordion>
