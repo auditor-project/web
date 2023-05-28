@@ -19,7 +19,7 @@ import { type Language } from "prism-react-renderer";
 import { CommentDetails } from "./comment";
 import { CreateCommentComponent } from "./create-comment";
 import { useDisclosure } from "@mantine/hooks";
-import { type Comments, Prisma, Results, User } from "@prisma/client";
+import { Prisma, Results } from "@prisma/client";
 import { api } from "~/utils/api";
 import { useFilePathStore } from "~/store/file-path";
 import { useState } from "react";
